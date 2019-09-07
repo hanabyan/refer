@@ -3,6 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Model_client extends CI_Model {
     protected $table = 'Client';
+    protected $table_category = 'Categories';
 
     public function data($page = 0, $limit = 0, $where = array(), $search = '', $order = array(), $as_array = TRUE, $groupby = '')
     {
@@ -20,7 +21,9 @@ class Model_client extends CI_Model {
         $this->db->select($this->table . '.created_at');
         $this->db->select($this->table . '.updated_by');
         $this->db->select($this->table . '.updated_at');
+        $this->db->select($this->table_category . '.name as business_category_name');
         $this->db->from($this->table);
+        $this->db->join($this->table_category, $this->table . '.business_category_id = ' . $this->table_category . '.id', 'left');
 
         if ($limit > 0) {
             $this->db->limit($limit, $page * $limit - $limit);
@@ -123,7 +126,7 @@ class Model_client extends CI_Model {
 	{
 		$result['status'] = FALSE;
 		$this->db->trans_start();
-		$this->db->where($where_by, $id);
+		$this->db->where($where_by, $this->db->escape($id));
         $this->db->update($this->table, $data);
 		if ($this->db->trans_status() === FALSE)
 		{
