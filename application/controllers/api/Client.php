@@ -37,18 +37,6 @@ class Client extends MY_Controller {
     // TODO: check user exists
     public function index_post()
     {
-        // TODO: temporary master business category
-        $business_category = array(
-            array(
-                'id'    => 1,
-                'name'  => 'Packaged Food Producer',
-            ),
-            array(
-                'id'    => 2,
-                'name'  => 'Drink Producer',
-            ),
-        );
-
         $data = $this->post();
         $validation_result = $this->validate_common($data);
         if ($validation_result !== TRUE)
@@ -69,6 +57,7 @@ class Client extends MY_Controller {
         $mobile_phone = $this->_isExists('mobile_phone', $data);
         $email = $this->_isExists('email', $data);
         $username = $this->_isExists('username', $data);
+        $password = $this->_isExists('password', $data);
         $business_address = $this->_isExists('business_address', $data);
 
         // TODO: log created_at, created_by
@@ -83,7 +72,7 @@ class Client extends MY_Controller {
             'email'  => $email,
             'username'  => $username,
             'business_address'  => $business_address,
-            'password'  => md5('Abcde12345'),
+            'password'  => md5($password),
             'status'  => 1,
             'created_at'    => date('Y-m-d H:i:s'),
             'created_by'    => $this->subject_id
@@ -108,10 +97,7 @@ class Client extends MY_Controller {
 
     public function index_put($id = null)
     {
-        // TODO: check for xss script injection and else
-        $client_id = $id;
-
-        if (!$client_id)
+        if (!$id)
         {
             return $this->set_response('Client id can not be null', self::HTTP_BAD_REQUEST);
         }
@@ -132,6 +118,7 @@ class Client extends MY_Controller {
         $mobile_phone = $this->_isExists('mobile_phone', $data);
         $email = $this->_isExists('email', $data);
         $username = $this->_isExists('username', $data);
+        $password = $this->_isExists('password', $data);
         $business_address = $this->_isExists('business_address', $data);   
         
         $client_payload = array(
@@ -144,13 +131,13 @@ class Client extends MY_Controller {
             'email'  => $email,
             'username'  => $username,
             'business_address'  => $business_address,
-            'password'  => md5('Abcde12345'),
+            'password'  => md5($password),
             'status'  => 1,
             'updated_at'    => date('Y-m-d H:i:s'),
             'updated_by'    => $this->subject_id
         );
 
-        $result = $this->Model_client->update($client_id, $client_payload);
+        $result = $this->Model_client->update((int)$id, $client_payload);
 
         if (!$result['status'])
         {
@@ -164,7 +151,7 @@ class Client extends MY_Controller {
             return $this->set_response($error_message, self::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $updated_client = $this->Model_client->get(array( 'id'  => $client_id ));
+        $updated_client = $this->Model_client->get(array( 'id'  => $id ));
 
         return $this->set_response($updated_client, self::HTTP_OK);
     }
@@ -177,11 +164,11 @@ class Client extends MY_Controller {
                 'label' => 'Company Name',
                 'rules' => 'required' 
             ),
-            // array(
-            //     'field' => 'business_category_id',
-            //     'label' => 'Category',
-            //     'rules' => 'required' 
-            // ),
+            array(
+                'field' => 'business_category_id',
+                'label' => 'Category',
+                'rules' => 'required' 
+            ),
             array(
                 'field' => 'pic_name',
                 'label' => 'PIC Name',
@@ -202,6 +189,11 @@ class Client extends MY_Controller {
                 'label' => 'Username',
                 'rules' => 'required' 
             ),
+            // array(
+            //     'field' => 'password',
+            //     'label' => 'Password',
+            //     'rules' => 'required' 
+            // ),
         );
 
         $this->form_validation->set_data($data);
