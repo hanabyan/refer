@@ -103,4 +103,25 @@ class Model_category extends CI_Model {
 
         return $result;
     }
+
+    public function update($id = 0, $data = array(), $where_by = 'id')
+	{
+		$result['status'] = FALSE;
+		$this->db->trans_start();
+		$this->db->where($where_by, $this->db->escape($id));
+        $this->db->update($this->table, $data);
+		if ($this->db->trans_status() === FALSE)
+		{
+            $error = $this->db->error();
+            $result['message_number'] = $error['code'];
+            $result['message'] = $error['message'];
+		}
+        else
+        {
+			$result['status'] = TRUE;
+		    $this->db->trans_complete();
+        }
+
+		return $result;
+	}
 }
