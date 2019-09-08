@@ -16,7 +16,16 @@ class Product extends MY_Controller {
 
     public function index_get()
     {
-        $data = $this->Model_product->data();
+        $id = $this->input->get('id');
+        $id = trim($id);
+        if ($id) {
+            $excludeProduct = array_map("intval", explode(",",$id));
+            $excludeProduct = array_unique($excludeProduct);
+            $sql = "SELECT B.*, C.`name` AS `category_name`, D.`company_name` AS `client_name` FROM `Product` B, `Categories` C, `Client` D WHERE B.`category_id` = C.`id` AND B.`client_id` = D.`id` AND B.`id` NOT IN ? ORDER BY B.`name`";
+            $data = $this->db->query($sql,array($excludeProduct))->result_array();
+        } else {
+            $data = $this->Model_product->data();
+        }
 
         return $this->set_response($data, self::HTTP_OK);
     }
@@ -110,7 +119,7 @@ class Product extends MY_Controller {
         {
             return $this->set_response($result['message'], self::HTTP_BAD_REQUEST);
         }
-        
+
         $detail_product = $this->Model_product->get(array('id' => $id));
 
         return $this->set_response($detail_product, self::HTTP_OK);
@@ -122,37 +131,37 @@ class Product extends MY_Controller {
             array(
                 'field' => 'name',
                 'label' => 'Product Name',
-                'rules' => 'required' 
+                'rules' => 'required'
             ),
             array(
                 'field' => 'description',
                 'label' => 'Product Description',
-                'rules' => 'required' 
+                'rules' => 'required'
             ),
             array(
                 'field' => 'estimated_price',
                 'label' => 'Estimated Price',
-                'rules' => 'required' 
+                'rules' => 'required'
             ),
             // array(
             //     'field' => 'image',
             //     'label' => 'Image',
-            //     'rules' => 'required' 
+            //     'rules' => 'required'
             // ),
             // array(
             //     'field' => 'sku',
             //     'label' => 'SKU',
-            //     'rules' => 'required' 
+            //     'rules' => 'required'
             // ),
             array(
                 'field' => 'category_id',
                 'label' => 'Category',
-                'rules' => 'required' 
+                'rules' => 'required'
             ),
             array(
                 'field' => 'client_id',
                 'label' => 'Client',
-                'rules' => 'required' 
+                'rules' => 'required'
             ),
         );
 
