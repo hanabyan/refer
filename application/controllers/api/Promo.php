@@ -20,9 +20,9 @@ class Promo extends MY_Controller {
             $sql = "SELECT `id`, `name`, `description`, `promo_type`, `promo_value`, `period_start`, `period_end`, `unlimited`, `referral_commission`, `referral_share_count`, `status` FROM `Promo` WHERE `id` = ? AND `status` = 1";
             $promo = (array) $this->db->query($sql, array($id))->row();
             if ($promo) {
-				$this->response($promo, REST_Controller::HTTP_OK);
+				$this->response($promo, self::HTTP_OK);
 			} else {
-				$this->response("Invalid Campaign", REST_Controller::HTTP_BAD_REQUEST);
+				$this->response("Invalid Campaign", self::HTTP_BAD_REQUEST);
 			}
         }
     }
@@ -40,7 +40,7 @@ class Promo extends MY_Controller {
             $start_date = date('Y-m-d H:i:s', strtotime($period_start));
             $end_date = date('Y-m-d H:i:s', strtotime($period_end));
         } catch (Exception $e) {
-            $this->response('Invalid Period', REST_Controller::HTTP_BAD_REQUEST);
+            $this->response('Invalid Period', self::HTTP_BAD_REQUEST);
         }
 
         $datas = array();
@@ -52,9 +52,9 @@ class Promo extends MY_Controller {
             $this->db->insert('Promo', $datas);
             $lastId = $this->db->insert_id();
 
-            $this->response($lastId, REST_Controller::HTTP_OK);
+            $this->response($lastId, self::HTTP_OK);
         } catch(Exception $e) {
-            $this->response('Error while processing data', REST_Controller::HTTP_INTERNAL_SERVER_ERROR);
+            $this->response('Error while processing data', self::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -62,12 +62,12 @@ class Promo extends MY_Controller {
 	{
         $id = intval($id);
         if ($id<1) {
-			$this->response('Invalid Promo', REST_Controller::HTTP_BAD_REQUEST);
+			$this->response('Invalid Promo', self::HTTP_BAD_REQUEST);
         }
         $sql = "SELECT `id` FROM `Promo` WHERE `id` = ? AND `status` = 1 LIMIT 1";
         $ori = $this->db->query($sql, array($id))->row();
         if (!$ori) {
-            $this->response('Invalid Promo', REST_Controller::HTTP_BAD_REQUEST);
+            $this->response('Invalid Promo', self::HTTP_BAD_REQUEST);
         }
 
 		$cols = array(
@@ -81,7 +81,7 @@ class Promo extends MY_Controller {
             $start_date = date('Y-m-d H:i:s', strtotime($period_start));
             $end_date = date('Y-m-d H:i:s', strtotime($period_end));
         } catch (Exception $e) {
-            $this->response('Invalid Period', REST_Controller::HTTP_BAD_REQUEST);
+            $this->response('Invalid Period', self::HTTP_BAD_REQUEST);
         }
 
         $datas = array();
@@ -91,9 +91,9 @@ class Promo extends MY_Controller {
         $datas["updated_by"] = $this->subject_id;
         try {
             $this->db->update('Promo', $datas, array('id' => $ori->id));
-            $this->response($ori->id, REST_Controller::HTTP_OK);
+            $this->response($ori->id, self::HTTP_OK);
         } catch(Exception $e) {
-            $this->response('Error while processing data', REST_Controller::HTTP_INTERNAL_SERVER_ERROR);
+            $this->response('Error while processing data', self::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
