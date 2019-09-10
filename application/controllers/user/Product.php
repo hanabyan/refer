@@ -157,6 +157,7 @@ class Product extends MY_Controller{
         $products = $this->db->query($sql)->result_array();
 
         $productIDsInvalid = array();
+        $codeBatch = array();
         foreach ($products as $k => $v) {
             if ($promoRedeemed) {
                 $search = array(
@@ -185,12 +186,26 @@ class Product extends MY_Controller{
                     $products[$k]['share_url'] = $this->shareHost . base64_encode($promoShareCode[$key]['code']);
                 }
             }
+
+            if (!$products[$k]['share_url']) {
+                $newCode = $this->generate_code();
+                $products[$k]['share_url'] = $this->shareHost . base64_encode($newCode);
+                $codeBatch[] = array(
+                    "promo_id"=>$v['promo_id'],
+                    "product_id"=>$v['product_id'],
+                    "code"=>$newCode,
+                    "user_id" => $this->subject_id,
+                );
+            }
         }
         if ($productIDsInvalid) {
             foreach ($productIDsInvalid as $k) {
                 unset($products[$k]);
             }
             $products = array_values($products);
+        }
+        if ($codeBatch) {
+            $this->db->insert_batch('Promo_Referrer', $codeBatch);
         }
 
         if ($products) {
@@ -228,7 +243,7 @@ class Product extends MY_Controller{
             $random_character = $input[mt_rand(0, $input_length - 1)];
             $random_string .= $random_character;
         }
-
+        usleep(rand(1000,2000));
         return $random_string;
     }
 
