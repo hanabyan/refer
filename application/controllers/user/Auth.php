@@ -81,7 +81,7 @@ class Auth extends MY_Controller {
         $response = array(
             'token' => $token,
             'name'  => $user->name,
-            'email'  => $user->phone,
+            'phone'  => $user->phone,
         );
 
         return $this->response($response, self::HTTP_OK);
