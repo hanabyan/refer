@@ -147,7 +147,7 @@ class Product extends MY_Controller{
         $sql = "SELECT
         A.`id`, B.`id` AS `product_id`, B.`name` AS `product_name`, B.`description` AS `product_description`, B.`estimated_price`,
         B.`image`, A.`total_item`, A.`total_item` AS `total_item_left`,
-        P.`id` AS `promo_id`, P.`name` AS `promo_name`, P.`promo_type`, P.`promo_value`, P.`description` AS `promo_description`,
+        P.`id` AS `promo_id`, P.`name` AS `promo_name`, P.`promo_type`, P.`promo_value`, P.`referral_commission`, P.`description` AS `promo_description`,
         '' AS `share_url`
             FROM `Promo_Product` A, `Promo` P, `Product` B
         WHERE
