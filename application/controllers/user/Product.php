@@ -145,7 +145,7 @@ class Product extends MY_Controller{
         $promoShareCode = $this->db->query($sql,array($this->subject_id))->result_array();
 
         $sql = "SELECT
-        B.`id` AS `product_id`, B.`name` AS `product_name`, B.`description` AS `product_description`, B.`estimated_price`,
+        A.`id`, B.`id` AS `product_id`, B.`name` AS `product_name`, B.`description` AS `product_description`, B.`estimated_price`,
         B.`image`, A.`total_item`, A.`total_item` AS `total_item_left`,
         P.`id` AS `promo_id`, P.`name` AS `promo_name`, P.`promo_type`, P.`promo_value`, P.`description` AS `promo_description`,
         '' AS `share_url`
