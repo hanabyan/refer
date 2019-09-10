@@ -78,22 +78,9 @@ class Product extends MY_Controller{
             $this->response('Gagal memproses data', self::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-    public function share_put() {
-        $code = $this->put('code');
-        $code = $this->clean_code($code);
-        if (!$code) {
-            $this->response('Kode salah', self::HTTP_BAD_REQUEST);
-        }
-        try {
-            $sql = "UPDATE `Promo_Referrer` SET `shared_count` = `shared_count` + 1 WHERE `code` = ?";
-            $this->db->query($sql, array($code));
-            $this->response($code, self::HTTP_OK);
-        } catch(Exception $e) {
-            $this->response('Gagal memproses data', self::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
 
-    public function share_get() {
+    public function share_get()
+    {
         $promoID = $this->input->get('promo_id');
         $promoID = intval(trim($promoID));
         $prodID = $this->input->get('product_id');
@@ -215,7 +202,8 @@ class Product extends MY_Controller{
         $this->response($products, self::HTTP_OK);
     }
 
-    private function multidimensional_search($parents, $searched) {
+    private function multidimensional_search($parents, $searched)
+    {
         if (empty($searched) || empty($parents)) {
           return false;
         }
