@@ -97,7 +97,7 @@ class Promo extends MY_Controller {
     public function index_post()
 	{
 		$cols = array(
-            'name', 'description', 'promo_type', 'promo_value', 'period_start', 'period_end', 'unlimited', 'referral_commission', 'referral_share_count'
+            'name', 'description', 'promo_type', 'promo_value', 'period_start', 'period_end', 'referral_commission', 'referral_share_count'
         );
         foreach ($cols as $col) {
             $$col = trim($this->post($col));
