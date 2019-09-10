@@ -23,6 +23,7 @@ require APPPATH . 'libraries/Format.php';
 class MY_Controller extends CI_Controller {
     protected $is_guarded = true;
     protected $subject_id;
+    public $refer_role = "admin";
 
     use REST_Controller {
         REST_Controller::__construct as private __resTraitConstruct;
@@ -179,7 +180,7 @@ class MY_Controller extends CI_Controller {
     protected function verify_auth()
     {
         $headers = $this->input->request_headers();
-        
+
         if (isset($headers['Authorization']))
         {
             $token = $headers['Authorization'];
@@ -193,8 +194,7 @@ class MY_Controller extends CI_Controller {
         }
 
         try {
-            $data = AUTHORIZATION::validateToken($token);
-
+            $data = AUTHORIZATION::validateTimestamp($token,$this->refer_role);
             if ($data === false)
             {
                 $this->set_response('Unauthorized Access!', self::HTTP_UNAUTHORIZED, false);

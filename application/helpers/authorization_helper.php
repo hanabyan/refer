@@ -1,23 +1,31 @@
 <?php
 class AUTHORIZATION
 {
-    public static function validateTimestamp($token)
+    public static function validateTimestamp($token,$user='admin')
     {
         $CI =& get_instance();
-        $token = self::validateToken($token);
-        if ($token != false && (now() - $token->timestamp < ($CI->config->item('token_timeout') * 60))) {
+        $token = self::validateToken($token,$user);
+        if ($token != false && (time() - $token->exp < ($CI->config->item('token_timeout') * 60))) {
             return $token;
         }
         return false;
     }
-    public static function validateToken($token)
+    public static function validateToken($token,$user='admin')
     {
         $CI =& get_instance();
-        return JWT::decode($token, $CI->config->item('jwt_key'));
+        if ($user=='user') {
+            return JWT::decode($token, $CI->config->item('jwt_key_user'));
+        } else {
+            return JWT::decode($token, $CI->config->item('jwt_key'));
+        }
     }
-    public static function generateToken($data)
+    public static function generateToken($data,$user='admin')
     {
         $CI =& get_instance();
-        return JWT::encode($data, $CI->config->item('jwt_key'));
+        if ($user=='user') {
+            return JWT::encode($data, $CI->config->item('jwt_key_user'));
+        } else {
+            return JWT::encode($data, $CI->config->item('jwt_key'));
+        }
     }
 }

@@ -1,11 +1,12 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Product extends MY_Controller {
+class Product extends MY_Controller{
     private $shareHost = 'https://refer.co.id/user/';
 
     public function __construct()
     {
+        $this->refer_role = 'user';
         parent::__construct();
     }
 
@@ -14,11 +15,11 @@ class Product extends MY_Controller {
         $code = $this->post('code');
         $code = $this->clean_code($code);
         if (!$code) {
-            $this->response('Invalid Code', self::HTTP_BAD_REQUEST);
+            $this->response('Kode salah', self::HTTP_BAD_REQUEST);
         }
         $imageURL = $this->post('image_url');
         if (!$imageURL) {
-            $this->response('Invalid Image', self::HTTP_BAD_REQUEST);
+            $this->response('Gambar harus diisi', self::HTTP_BAD_REQUEST);
         }
 
         try {
@@ -26,21 +27,21 @@ class Product extends MY_Controller {
             $sql = "SELECT `promo_id`, `product_id`, `user_id` FROM `Promo_Referrer` WHERE `code` = ? LIMIT 1";
             $referrer = $this->db->query($sql, array($code))->row();
             if (!$referrer) {
-                $this->response('Invalid Referrer Code', self::HTTP_BAD_REQUEST);
+                $this->response('Kode salah', self::HTTP_BAD_REQUEST);
             }
 
             // check promo stil valid
             $sql = "SELECT `id`,`referral_commission` FROM `Promo` WHERE `id` = ? AND NOW() BETWEEN `period_start` AND `period_end` AND `status` = 1 LIMIT 1";
             $promo = $this->db->query($sql, array($referrer->promo_id))->row();
             if (!$promo) {
-                $this->response('Invalid Promo', self::HTTP_BAD_REQUEST);
+                $this->response('Promo tidak ditemukan', self::HTTP_BAD_REQUEST);
             }
 
             // check product stil valid
             $sql = "SELECT `id` FROM `Product` WHERE `id` = ? LIMIT 1";
             $product = $this->db->query($sql, array($referrer->product_id))->row();
             if (!$product) {
-                $this->response('Invalid Product', self::HTTP_BAD_REQUEST);
+                $this->response('Produk tidak ditemukan', self::HTTP_BAD_REQUEST);
             }
 
             $sql = "SELECT `id`, `status`, `referrer_id` FROM `Promo_User` WHERE `promo_id` = ? AND `product_id` = ? AND `user_id` = ? LIMIT 1";
@@ -62,10 +63,10 @@ class Product extends MY_Controller {
                 $this->response($lastId, self::HTTP_OK);
             } else {
                 if ($promoUser->referrer_id != $referrer->user_id) {
-                    $this->response('Product already claimed', self::HTTP_BAD_REQUEST);
+                    $this->response('Produk sudah diklaim', self::HTTP_BAD_REQUEST);
                 }
-                if ($promoUser->referrer_id == '1' || $promoUser->referrer_id == '3') {
-                    $this->response('Product already claimed', self::HTTP_BAD_REQUEST);
+                if ($promoUser->status == '1' || $promoUser->status == '3') {
+                    $this->response('Produk sudah diklaim', self::HTTP_BAD_REQUEST);
                 }
                 $datas = array(
                     "receipt_image" => $imageURL
@@ -74,21 +75,21 @@ class Product extends MY_Controller {
                 $this->response($promoUser->id, self::HTTP_OK);
             }
         } catch(Exception $e) {
-            $this->response('Error while processing data', self::HTTP_INTERNAL_SERVER_ERROR);
+            $this->response('Gagal memproses data', self::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
     public function share_put() {
         $code = $this->put('code');
         $code = $this->clean_code($code);
         if (!$code) {
-            $this->response('Invalid Code', self::HTTP_BAD_REQUEST);
+            $this->response('Kode salah', self::HTTP_BAD_REQUEST);
         }
         try {
             $sql = "UPDATE `Promo_Referrer` SET `shared_count` = `shared_count` + 1 WHERE `code` = ?";
             $this->db->query($sql, array($code));
             $this->response($code, self::HTTP_OK);
         } catch(Exception $e) {
-            $this->response('Error while processing data', self::HTTP_INTERNAL_SERVER_ERROR);
+            $this->response('Gagal memproses data', self::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -99,11 +100,11 @@ class Product extends MY_Controller {
         $prodID = intval(trim($prodID));
 
         if ($promoID < 1 || $prodID < 1) {
-            $this->response('Invalid Promo Product', self::HTTP_BAD_REQUEST);
+            $this->response('Promo produk salah', self::HTTP_BAD_REQUEST);
         }
         $this->subject_id = intval($this->subject_id);
         if ($this->subject_id < 1) {
-            $this->response('Invalid Referral', self::HTTP_BAD_REQUEST);
+            $this->response('User tidak ditemukan', self::HTTP_BAD_REQUEST);
         }
 
         $sql = "SELECT `code` FROM `Promo_Referrer` WHERE `promo_id` = ? AND `product_id` = ? AND `user_id` = ? LIMIT 1";
@@ -132,7 +133,7 @@ class Product extends MY_Controller {
                             $valid = false;
                         } catch(Exception $e) {
                             $valid = false;
-                            $this->response('Error while processing data', self::HTTP_INTERNAL_SERVER_ERROR);
+                            $this->response('Gagal memproses data', self::HTTP_INTERNAL_SERVER_ERROR);
                         }
                     }
                     usleep(100000);
@@ -140,10 +141,10 @@ class Product extends MY_Controller {
                 if ($code) {
                     $this->response($this->shareHost . base64_encode($code), self::HTTP_OK);
                 } else {
-                    $this->response('Error while processing data', self::HTTP_INTERNAL_SERVER_ERROR);
+                    $this->response('Gagal memproses data', self::HTTP_INTERNAL_SERVER_ERROR);
                 }
             } else {
-                $this->response('Invalid Promo', self::HTTP_BAD_REQUEST);
+                $this->response('Promo tidak ditemukan', self::HTTP_BAD_REQUEST);
             }
         }
     }
