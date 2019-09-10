@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Product extends MY_Controller{
-    private $shareHost = 'https://refer.co.id/user/';
+    private $shareHost = 'https://refer.co.id/user/c/';
 
     public function __construct()
     {
