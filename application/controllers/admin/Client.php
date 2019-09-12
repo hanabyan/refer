@@ -1,4 +1,5 @@
 <?php
+// TODO: update password scenarion (secure), seperti di User
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Client extends MY_Controller {
