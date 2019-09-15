@@ -57,17 +57,20 @@ class Auth extends MY_Controller {
         $password = trim($this->post('password'));
 
         if ( !$phone || !$password ) {
-            return $this->response('No. Handphone atau Password salah', self::HTTP_BAD_REQUEST);
+            $this->response('No. Handphone atau Password salah', self::HTTP_BAD_REQUEST);
         }
         if (strlen($password) < 6) {
-          return $this->response('No. Handphone atau Password salah', self::HTTP_BAD_REQUEST);
+          $this->response('No. Handphone atau Password salah', self::HTTP_BAD_REQUEST);
         }
 
-        $sql = "SELECT `id`, `name`, `phone`, `password` FROM `User` WHERE `phone` = ? LIMIT 1";
+        $sql = "SELECT `id`, `name`, `phone`, `password`,`verified` FROM `User` WHERE `phone` = ? LIMIT 1";
         $user = $this->db->query($sql, array($phone))->row();
 
+        if ($user->verified=='0') {
+            $this->response('Akun Anda belum terverifikasi', self::HTTP_UNAUTHORIZED);
+        }
         if (!$user || FALSE === hash_equals($user->password, md5($password)) ) {
-            return $this->response('No. Handphone atau Password salah', self::HTTP_UNAUTHORIZED);
+            $this->response('No. Handphone atau Password salah', self::HTTP_UNAUTHORIZED);
         }
 
         // TODO: consider issuer and audience as security concern
@@ -84,6 +87,6 @@ class Auth extends MY_Controller {
             'phone'  => $user->phone,
         );
 
-        return $this->response($response, self::HTTP_OK);
+        $this->response($response, self::HTTP_OK);
     }
 }

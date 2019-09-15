@@ -45,6 +45,7 @@ class Register extends MY_Controller {
       }
 
       try {
+          $this->db->trans_begin();
           $datas = array(
             'name' => $name,
             'phone' => $phone,
@@ -52,12 +53,75 @@ class Register extends MY_Controller {
             'dob' => $dob,
             'password' => MD5($password)
           );
-          $this->db->insert('User', $datas);
-          $lastId = $this->db->insert_id();
-          $this->response($lastId, self::HTTP_OK);
+          if ($this->db->insert('User', $datas)) {
+            $lastId = $this->db->insert_id();
+
+            $datasOTP = array(
+              'user_id' => $lastId,
+              'code' => "111111",
+              'sent_time' => date('Y-m-d H:i:s')
+            );
+            $this->db->insert('User_OTP', $datasOTP);
+
+            if ($this->db->trans_status() === FALSE) {
+              $this->db->trans_rollback();
+              $this->response('Database error', self::HTTP_INTERNAL_SERVER_ERROR);
+            } else {
+                $this->db->trans_commit();
+                $this->response($lastId, self::HTTP_OK);
+            }
+          } else {
+            $this->response('Gagal memproses data', self::HTTP_INTERNAL_SERVER_ERROR);
+          }
       } catch(Exception $e) {
           $this->response('Gagal memproses data', self::HTTP_INTERNAL_SERVER_ERROR);
       }
+    }
+
+    public function verify_put($id=0)
+    {
+        $id = intval($id);
+        if ($id<1) {
+          $this->response('Invalid User ID', self::HTTP_BAD_REQUEST);
+        }
+
+        $otp = $this->put('code');
+        $otp = $this->cleanOTP(trim($otp));
+        if (!$otp) {
+          return $this->response("Invalid kode", self::HTTP_BAD_REQUEST);
+        }
+
+        $sql = "SELECT `id` FROM `User_OTP` WHERE `user_id` = ? AND `code` = ? LIMIT 1";
+        $otpLog = $this->db->query($sql, array($id,$otp))->row();
+        if (!$otpLog) {
+          $this->response('Kode tidak ditemukan', self::HTTP_BAD_REQUEST);
+        }
+
+        $sql = "SELECT `id`, `verified` FROM `User` WHERE `id` = ? AND `status` = 1";
+        $user = $this->db->query($sql, array($id))->row();
+        if (!$user) {
+          $this->response('User tidak ditemukan', self::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $datas = array('verified'=>1);
+            $this->db->update('User', $datas, array('id' => $id));
+            $this->response($id, self::HTTP_OK);
+        } catch(Exception $e) {
+            $this->response('Gagal memproses data', self::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private function cleanOTP($code="")
+    {
+      if (!$code) {
+        return false;
+      }
+      $code = preg_replace('/\D/', '', $code);
+      if (!$code || strlen($code) < 6) {
+        return false;
+      }
+      return $code;
     }
 
     private function cleanPhone($phone="")
@@ -85,5 +149,17 @@ class Register extends MY_Controller {
         return "0".substr($phone, 2);
       }
       return "+".$phone;
+    }
+
+    private function generate_otp($length = 6)
+    {
+        $input = '0123456789';
+        $input_length = strlen($input);
+        $random_string = '';
+        for($i = 0; $i < $length; $i++) {
+            $random_character = $input[mt_rand(0, $input_length - 1)];
+            $random_string .= $random_character;
+        }
+        return $random_string;
     }
 }
