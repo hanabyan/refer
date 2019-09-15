@@ -141,7 +141,7 @@ class Product extends MY_Controller{
                         "referrer_id" => $this->subject_id, //karena dirisendiri
                         "user_id" => $this->subject_id,
                         "date" => date("Y-m-d H:i:s"),
-                        "code" => "0", //karena dirisendiri
+                        "code" => NULL, //karena dirisendiri
                         "commission_value" => 0, //karena dirisendiri
                         "created_by" => $this->subject_id,
                     );
@@ -155,7 +155,7 @@ class Product extends MY_Controller{
                             "referrer_id" => $this->subject_id, //karena dirisendiri
                             "user_id" => $this->subject_id,
                             "date" => date("Y-m-d H:i:s"),
-                            "code" => "0", //karena dirisendiri
+                            "code" => NULL, //karena dirisendiri
                             "commission_value" => 0, //karena dirisendiri
                             "created_by" => $this->subject_id,
                         );
