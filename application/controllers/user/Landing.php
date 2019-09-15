@@ -40,9 +40,23 @@ class Landing extends MY_Controller{
                 $this->response('Produk tidak ditemukan', self::HTTP_BAD_REQUEST);
             }
 
-            $sql = "UPDATE `Promo_Referrer` SET `shared_count` = `shared_count` + 1 WHERE `code` = ?";
-            $this->db->query($sql, array($code));
-            $this->response(array("promo"=>$promo,"product"=>$product), self::HTTP_OK);
+            // check promo stil valid
+            $sql = "SELECT COUNT(*) AS `redeemed` FROM `Promo_User` WHERE `promo_id` = ? AND `product_id` = ? AND `status` IN (1,4)";
+            $promoRedeem = $this->db->query($sql, array($referrer->promo_id,$referrer->product_id))->row();
+            if ($promoRedeem) {
+                $sql = "SELECT `total_item` FROM `Promo_Product` WHERE `product_id`=? AND `promo_id`=? LIMIT 1";
+                $promoProduct = $this->db->query($sql, array($referrer->product_id,$referrer->promo_id))->row();
+                if (!$promoProduct) {
+                    $this->response('Promo Produk tidak ditemukan', self::HTTP_BAD_REQUEST);
+                }
+                if ($promoRedeem->redeemed >= $promoProduct->total_item ) {
+                    $this->response('Promo Produk sudah tidak tersedia', self::HTTP_BAD_REQUEST);
+                }
+            }
+
+            // $sql = "UPDATE `Promo_Referrer` SET `shared_count` = `shared_count` + 1 WHERE `code` = ?";
+            // $this->db->query($sql, array($code));
+            // $this->response(array("promo"=>$promo,"product"=>$product), self::HTTP_OK);
         } catch(Exception $e) {
             $this->response('Gagal memproses data', self::HTTP_INTERNAL_SERVER_ERROR);
         }
