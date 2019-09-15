@@ -101,7 +101,7 @@ class Reward extends MY_Controller{
                     $this->db->update('Promo_User', $datas, array('id' => $promoUser->id));
                   }
                   $resp['reward'] = $promoUser->id;
-                  $this->response($resp, self::HTTP_BAD_REQUEST);
+                  $this->response($resp, self::HTTP_OK);
                 } else {
                   $resp['reward'] = $promoUser->id;
                   $resp['message'] = "Promo Produk sudah diklaim";
