@@ -20,27 +20,27 @@ class Register extends MY_Controller {
 
       $phone = $this->cleanPhone($phone);
       if (!$name || !$password || !$phone || !$dob) {
-        return $this->response("Form harus diisi", self::HTTP_BAD_REQUEST);
+        $this->response("Form harus diisi", self::HTTP_BAD_REQUEST);
       }
       if (strlen($password)<6) {
-        return $this->response("Password minimal 6 karakter", self::HTTP_BAD_REQUEST);
+        $this->response("Password minimal 6 karakter", self::HTTP_BAD_REQUEST);
       }
       if (FALSE === DateTime::createFromFormat('Y-m-d', $dob)) {
-        return $this->response("Format Tanggal Lahir salah", self::HTTP_BAD_REQUEST);
+        $this->response("Format Tanggal Lahir salah", self::HTTP_BAD_REQUEST);
       }
       if ($email && FALSE === filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        return $this->response("Format email salah", self::HTTP_BAD_REQUEST);
+        $this->response("Format email salah", self::HTTP_BAD_REQUEST);
       }
       $sql = "SELECT `id` FROM `User` WHERE `phone` = ? LIMIT 1";
       $userPhone = $this->db->query($sql, array($phone))->row();
       if ($userPhone) {
-        return $this->response("No. Handphone sudah terdaftar", self::HTTP_BAD_REQUEST);
+        $this->response("No. Handphone sudah terdaftar", self::HTTP_BAD_REQUEST);
       }
       if ($email) {
         $sql = "SELECT `id` FROM `User` WHERE `email` = ? LIMIT 1";
         $userEmail = $this->db->query($sql, array($email))->row();
         if ($userEmail) {
-          return $this->response("Email sudah terdaftar", self::HTTP_BAD_REQUEST);
+           $this->response("Email sudah terdaftar", self::HTTP_BAD_REQUEST);
         }
       }
 
@@ -88,7 +88,7 @@ class Register extends MY_Controller {
         $otp = $this->put('code');
         $otp = $this->cleanOTP(trim($otp));
         if (!$otp) {
-          return $this->response("Invalid kode", self::HTTP_BAD_REQUEST);
+          $this->response("Invalid kode", self::HTTP_BAD_REQUEST);
         }
 
         $sql = "SELECT `id` FROM `User_OTP` WHERE `user_id` = ? AND `code` = ? LIMIT 1";

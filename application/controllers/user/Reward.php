@@ -33,7 +33,9 @@ class Reward extends MY_Controller{
         // $promoRedeemed = $this->db->query($sql)->result_array();
 
         $sql = "SELECT
-        A.`id`, A.`status`, B.`id` AS `product_id`, B.`name` AS `product_name`, B.`description` AS `product_description`, B.`estimated_price`, B.`image`,
+        A.`id`, A.`status`, IFNULL(A.`status_update`,'') AS `validate_time`, IFNULL(A.`status_comment`,'') AS `note`,
+        IFNULL(A.`receipt_image`,'') AS `receipt_image`, B.`id` AS `product_id`, B.`name` AS `product_name`,
+        B.`description` AS `product_description`, B.`estimated_price`, B.`image`,
         P.`id` AS `promo_id`, P.`name` AS `promo_name`, P.`promo_type`, P.`promo_value`, P.`referral_commission`, P.`referral_share_count`, P.`description` AS `promo_description`, '' AS `share_url`, '0' AS `shared_count`
             FROM `Promo_User` A, `Promo` P, `Product` B
         WHERE
