@@ -29,7 +29,7 @@ class Auth extends MY_Controller {
         return false;
       }
       $phone = preg_replace('/\D/', '', $phone);
-      if (!$phone || strlen($phone) < 5) {
+      if (!$phone || strlen($phone) < 6) {
         return false;
       }
       if (substr($phone, 0,2) === "00") {
