@@ -90,7 +90,7 @@ class Reward extends MY_Controller{
                 $this->db->insert('Promo_User', $datas);
                 $lastId = $this->db->insert_id();
                 $resp['reward'] = $lastId;
-                $this->response($lastId, self::HTTP_OK);
+                $this->response($resp, self::HTTP_OK);
             } else {
                 if ($promoUser->status == '0') {
                   // jika dari referer yg berbeda, diupdate aja refererya
