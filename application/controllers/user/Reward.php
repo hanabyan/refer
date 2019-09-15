@@ -10,11 +10,6 @@ class Reward extends MY_Controller{
         parent::__construct();
     }
 
-    public function index_get()
-    {
-
-    }
-
     public function index_post()
     {
         $resp = array(
@@ -82,7 +77,6 @@ class Reward extends MY_Controller{
                     "product_id" => $referrer->product_id,
                     "referrer_id" => $referrer->user_id,
                     "user_id" => $this->subject_id,
-                    "receipt_image" => $imageURL,
                     "date" => date("Y-m-d H:i:s"),
                     "code" => $code,
                     "commission_value" => $promo->referral_commission,
