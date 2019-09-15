@@ -15,7 +15,7 @@ class Landing extends MY_Controller{
         $code = $this->input->get('code');
         $code = $this->clean_code($code);
         if (!$code) {
-            $this->response('Kode salah', self::HTTP_BAD_REQUEST);
+            $this->response('Kode salah'.$code, self::HTTP_BAD_REQUEST);
         }
 
         try {
@@ -23,7 +23,7 @@ class Landing extends MY_Controller{
             $sql = "SELECT `promo_id`, `product_id`, `user_id` FROM `Promo_Referrer` WHERE `code` = ? LIMIT 1";
             $referrer = $this->db->query($sql, array($code))->row();
             if (!$referrer) {
-                $this->response('Kode salah', self::HTTP_BAD_REQUEST);
+                $this->response('Kode salah'.$code, self::HTTP_BAD_REQUEST);
             }
 
             // check promo stil valid
@@ -56,7 +56,7 @@ class Landing extends MY_Controller{
 
             // $sql = "UPDATE `Promo_Referrer` SET `shared_count` = `shared_count` + 1 WHERE `code` = ?";
             // $this->db->query($sql, array($code));
-            // $this->response(array("promo"=>$promo,"product"=>$product), self::HTTP_OK);
+            $this->response(array("promo"=>$promo,"product"=>$product), self::HTTP_OK);
         } catch(Exception $e) {
             $this->response('Gagal memproses data', self::HTTP_INTERNAL_SERVER_ERROR);
         }

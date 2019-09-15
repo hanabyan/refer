@@ -10,6 +10,11 @@ class Reward extends MY_Controller{
         parent::__construct();
     }
 
+    public function index_get()
+    {
+
+    }
+
     public function index_post()
     {
         $resp = array(

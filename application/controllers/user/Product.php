@@ -21,7 +21,7 @@ class Product extends MY_Controller{
         $sql = "SELECT
         A.`id`, B.`id` AS `product_id`, B.`name` AS `product_name`, B.`description` AS `product_description`, B.`estimated_price`,
         B.`image`, A.`total_item`, '0' AS `total_item_left`,
-        P.`id` AS `promo_id`, P.`name` AS `promo_name`, P.`promo_type`, P.`promo_value`, P.`referral_commission`, P.`description` AS `promo_description`, '' AS `share_url`, '0' AS `shared_count`
+        P.`id` AS `promo_id`, P.`name` AS `promo_name`, P.`promo_type`, P.`promo_value`, P.`referral_commission`, P.`referral_share_count`, P.`description` AS `promo_description`, '' AS `share_url`, '0' AS `shared_count`
             FROM `Promo_Product` A, `Promo` P, `Product` B
         WHERE
         A.`product_id` = B.`id` AND A.`promo_id` = P.`id` AND
@@ -46,6 +46,8 @@ class Product extends MY_Controller{
                         $products[$k]['total_item_left'] = $v['total_item'] - $promoRedeemed[$key]['cnt'];
                     }
                 }
+            } else {
+                $products[$k]['total_item_left'] = $v['total_item'];
             }
 
             if ($promoShareCode) {
