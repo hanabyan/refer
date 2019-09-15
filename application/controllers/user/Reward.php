@@ -204,13 +204,6 @@ class Reward extends MY_Controller{
         }
 
         try {
-            // check product stil valid
-            $sql = "SELECT `id` FROM `Product` WHERE `id` = ? AND `status` = 1 LIMIT 1";
-            $product = $this->db->query($sql, array($referrer->product_id))->row();
-            if (!$product) {
-                $this->response('Produk tidak ditemukan', self::HTTP_BAD_REQUEST);
-            }
-
             $sql = "SELECT `id`, `promo_id`, `product_id`, `status`, `referrer_id`, IFNULL(`status_update`,'') AS `status_update` FROM `Promo_User` WHERE `id` = ? AND `user_id` = ? LIMIT 1";
             $promoUser = $this->db->query($sql, array($id, $this->subject_id))->row();
             if (!$promoUser) {
@@ -222,6 +215,13 @@ class Reward extends MY_Controller{
             }
             if ($promoUser->status == '3') {
               $this->response('Promo Produk tidak ditemukan', self::HTTP_BAD_REQUEST);
+            }
+
+            // check product stil valid
+            $sql = "SELECT `id` FROM `Product` WHERE `id` = ? AND `status` = 1 LIMIT 1";
+            $product = $this->db->query($sql, array($promoUser->product_id))->row();
+            if (!$product) {
+                $this->response('Produk tidak ditemukan', self::HTTP_BAD_REQUEST);
             }
 
             // check promo stil valid
