@@ -29,16 +29,16 @@ class Reward extends MY_Controller{
 
     public function index_get()
     {
-        $sql = "SELECT PU.`promo_id`, PU.`product_id`, COUNT(*) AS `cnt` FROM `Promo` P, `Promo_User` PU WHERE P.`id` = PU.`promo_id` AND NOW() BETWEEN P.`period_start` AND P.`period_end` AND P.`status` = 1 AND PU.`status` IN (1,4) GROUP BY 1, 2";
-        $promoRedeemed = $this->db->query($sql)->result_array();
+        // $sql = "SELECT PU.`promo_id`, PU.`product_id`, COUNT(*) AS `cnt` FROM `Promo` P, `Promo_User` PU WHERE P.`id` = PU.`promo_id` AND NOW() BETWEEN P.`period_start` AND P.`period_end` AND P.`status` = 1 AND PU.`status` IN (1,4) GROUP BY 1, 2";
+        // $promoRedeemed = $this->db->query($sql)->result_array();
 
         $sql = "SELECT
-        A.`id`, A.`status`, B.`id` AS `product_id`, B.`name` AS `product_name`, B.`description` AS `product_description`, B.`estimated_price`, B.`image`, A.`total_item`, '0' AS `total_item_left`,
+        A.`id`, A.`status`, B.`id` AS `product_id`, B.`name` AS `product_name`, B.`description` AS `product_description`, B.`estimated_price`, B.`image`,
         P.`id` AS `promo_id`, P.`name` AS `promo_name`, P.`promo_type`, P.`promo_value`, P.`referral_commission`, P.`referral_share_count`, P.`description` AS `promo_description`, '' AS `share_url`, '0' AS `shared_count`
             FROM `Promo_User` A, `Promo` P, `Product` B
         WHERE
-        A.`user_id` = ? AND A.`product_id` = B.`id` AND A.`promo_id` = P.`id` AND
-        NOW() BETWEEN P.`period_start` AND P.`period_end` AND P.`status` = 1 AND B.`status` = 1";
+          A.`user_id` = ? AND A.`product_id` = B.`id` AND A.`promo_id` = P.`id` AND
+          NOW() BETWEEN P.`period_start` AND P.`period_end` AND P.`status` = 1 AND B.`status` = 1";
         $products = $this->db->query($sql, array($this->subject_id))->result_array();
 
         $productIDsInvalid = array();
@@ -48,23 +48,23 @@ class Reward extends MY_Controller{
               $productIDsInvalid[] = $k;
               continue;
             }
-            if ($promoRedeemed) {
-                $search = array(
-                    'promo_id'=>$v['promo_id'],
-                    'product_id'=>$v['product_id'],
-                );
+            // if ($promoRedeemed) {
+            //     $search = array(
+            //         'promo_id'=>$v['promo_id'],
+            //         'product_id'=>$v['product_id'],
+            //     );
 
-                $key = $this->multidimensional_search($promoRedeemed,$search);
-                if (false !== $key) {
-                    if ($promoRedeemed[$key]['cnt'] >= $v['total_item']) {
-                        $productIDsInvalid[] = $k;
-                    } else {
-                        $products[$k]['total_item_left'] = $v['total_item'] - $promoRedeemed[$key]['cnt'];
-                    }
-                }
-            } else {
-                $products[$k]['total_item_left'] = $v['total_item'];
-            }
+            //     $key = $this->multidimensional_search($promoRedeemed,$search);
+            //     if (false !== $key) {
+            //         if ($promoRedeemed[$key]['cnt'] >= $v['total_item']) {
+            //             $productIDsInvalid[] = $k;
+            //         } else {
+            //             $products[$k]['total_item_left'] = $v['total_item'] - $promoRedeemed[$key]['cnt'];
+            //         }
+            //     }
+            // } else {
+            //     $products[$k]['total_item_left'] = $v['total_item'];
+            // }
         }
         if ($productIDsInvalid) {
             foreach ($productIDsInvalid as $k) {
