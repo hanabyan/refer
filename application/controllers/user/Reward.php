@@ -12,7 +12,85 @@ class Reward extends MY_Controller{
 
     public function index_get()
     {
+        $sql = "SELECT PU.`promo_id`, PU.`product_id`, COUNT(*) AS `cnt` FROM `Promo` P, `Promo_User` PU WHERE P.`id` = PU.`promo_id` AND NOW() BETWEEN P.`period_start` AND P.`period_end` AND P.`status` = 1 AND PU.`status` IN (1,4) GROUP BY 1, 2";
+        $promoRedeemed = $this->db->query($sql)->result_array();
 
+        $sql = "SELECT PR.`promo_id`, PR.`product_id`, PR.`code`, PR.`shared_count` FROM `Promo` P, `Promo_Referrer` PR WHERE P.`id` = PR.`promo_id` AND NOW() BETWEEN P.`period_start` AND P.`period_end` AND P.`status` = 1 AND PR.`user_id` = ?";
+        $promoShareCode = $this->db->query($sql,array($this->subject_id))->result_array();
+
+        $sql = "SELECT
+        A.`id`, B.`id` AS `product_id`, B.`name` AS `product_name`, B.`description` AS `product_description`, B.`estimated_price`,
+        B.`image`, A.`total_item`, '0' AS `total_item_left`,
+        P.`id` AS `promo_id`, P.`name` AS `promo_name`, P.`promo_type`, P.`promo_value`, P.`referral_commission`, P.`referral_share_count`, P.`description` AS `promo_description`, '' AS `share_url`, '0' AS `shared_count`
+            FROM `Promo_Product` A, `Promo` P, `Product` B
+        WHERE
+        A.`product_id` = B.`id` AND A.`promo_id` = P.`id` AND
+        NOW() BETWEEN P.`period_start` AND P.`period_end` AND P.`status` = 1 AND
+        B.`status` = 1";
+        $products = $this->db->query($sql)->result_array();
+
+        $productIDsInvalid = array();
+        $codeBatch = array();
+        foreach ($products as $k => $v) {
+            if ($promoRedeemed) {
+                $search = array(
+                    'promo_id'=>$v['promo_id'],
+                    'product_id'=>$v['product_id'],
+                );
+
+                $key = $this->multidimensional_search($promoRedeemed,$search);
+                if (false !== $key) {
+                    if ($promoRedeemed[$key]['cnt'] >= $v['total_item']) {
+                        $productIDsInvalid[] = $k;
+                    } else {
+                        $products[$k]['total_item_left'] = $v['total_item'] - $promoRedeemed[$key]['cnt'];
+                    }
+                }
+            } else {
+                $products[$k]['total_item_left'] = $v['total_item'];
+            }
+
+            if ($promoShareCode) {
+                $search = array(
+                    'promo_id'=>$v['promo_id'],
+                    'product_id'=>$v['product_id'],
+                );
+
+                $key = $this->multidimensional_search($promoShareCode,$search);
+                if (false !== $key) {
+                    $products[$k]['share_url'] = $this->shareHost . base64_encode($promoShareCode[$key]['code']);
+                    $products[$k]['shared_count'] = $promoShareCode[$key]['shared_count'];
+                }
+            }
+
+            if (!$products[$k]['share_url']) {
+                $newCode = $this->generate_code();
+                $products[$k]['share_url'] = $this->shareHost . base64_encode($newCode);
+                $codeBatch[] = array(
+                    "promo_id"=>$v['promo_id'],
+                    "product_id"=>$v['product_id'],
+                    "code"=>$newCode,
+                    "user_id" => $this->subject_id,
+                );
+            }
+        }
+        if ($productIDsInvalid) {
+            foreach ($productIDsInvalid as $k) {
+                unset($products[$k]);
+            }
+            $products = array_values($products);
+        }
+        if ($codeBatch) {
+            $this->db->insert_batch('Promo_Referrer', $codeBatch);
+        }
+
+        if ($products) {
+            array_multisort(array_map(function($element) {
+                return $element['product_name'];
+            }, $products), SORT_ASC, $products);
+        }
+
+        $this->response($products, self::HTTP_OK);
     }
 
     public function index_post()
@@ -120,7 +198,7 @@ class Reward extends MY_Controller{
         if ($id<1) {
           $this->response('Invalid Reward', self::HTTP_BAD_REQUEST);
         }
-        $imageURL = $this->post('image_url');
+        $imageURL = $this->put('image_url');
         if (!$imageURL) {
             $this->response('Gambar harus diisi', self::HTTP_BAD_REQUEST);
         }

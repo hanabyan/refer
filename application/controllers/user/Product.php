@@ -115,7 +115,7 @@ class Product extends MY_Controller{
         }
 
         // check promo stil valid
-        $sql = "SELECT `id` FROM `Promo` WHERE `id` = ? AND NOW() BETWEEN `period_start` AND `period_end` AND `status` = 1 LIMIT 1";
+        $sql = "SELECT `id`, `referral_share_count` FROM `Promo` WHERE `id` = ? AND NOW() BETWEEN `period_start` AND `period_end` AND `status` = 1 LIMIT 1";
         $promo = $this->db->query($sql, array($promoProduct->promo_id))->row();
         if (!$promo) {
             $this->response("Promo tidak ditemukan", self::HTTP_BAD_REQUEST);
@@ -130,8 +130,41 @@ class Product extends MY_Controller{
             if (!$promoReferrer) {
                 $this->response("Promo Produk Referrer tidak ditemukan", self::HTTP_BAD_REQUEST);
             }
+            // insert ke table promo user
+            if ($promoReferrer->shared_count >= $promo->referral_share_count) {
+                $sql = "SELECT `id`, `status`, `referrer_id` FROM `Promo_User` WHERE `promo_id` = ? AND `product_id` = ? AND `user_id` = ? LIMIT 1";
+                $promoUser = $this->db->query($sql, array($promoProduct->promo_id, $promoProduct->product_id, $this->subject_id))->row();
+                if (!$promoUser) {
+                    $datas = array(
+                        "promo_id" => $promoProduct->promo_id,
+                        "product_id" => $promoProduct->product_id,
+                        "referrer_id" => $this->subject_id, //karena dirisendiri
+                        "user_id" => $this->subject_id,
+                        "date" => date("Y-m-d H:i:s"),
+                        "code" => "0", //karena dirisendiri
+                        "commission_value" => 0, //karena dirisendiri
+                        "created_by" => $this->subject_id,
+                    );
+                    $this->db->insert('Promo_User', $datas);
+                    $this->response($promoReferrer->shared_count, self::HTTP_OK);
+                } else {
+                    //apapun statusnya yg pernah ada asal bukan descline,
+                    if ($promoUser->status == '3') {
+                        $datas = array(
+                            "status" => 0,
+                            "referrer_id" => $this->subject_id, //karena dirisendiri
+                            "user_id" => $this->subject_id,
+                            "date" => date("Y-m-d H:i:s"),
+                            "code" => "0", //karena dirisendiri
+                            "commission_value" => 0, //karena dirisendiri
+                            "created_by" => $this->subject_id,
+                        );
+                        $this->db->update('Promo_User', $datas, array('id' => $promoUser->id));
+                        $this->response($promoReferrer->shared_count, self::HTTP_OK);
+                    }
+                }
+            }
             $this->response($promoReferrer->shared_count, self::HTTP_OK);
-
         } catch(Exception $e) {
             $this->response('Error while processing data', self::HTTP_INTERNAL_SERVER_ERROR);
         }
