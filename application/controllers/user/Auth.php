@@ -66,11 +66,16 @@ class Auth extends MY_Controller {
         $sql = "SELECT `id`, `name`, `phone`, `password`,`verified` FROM `User` WHERE `phone` = ? LIMIT 1";
         $user = $this->db->query($sql, array($phone))->row();
 
-        if ($user->verified=='0') {
-            $this->response('Akun Anda belum terverifikasi', self::HTTP_UNAUTHORIZED);
-        }
-        if (!$user || FALSE === hash_equals($user->password, md5($password)) ) {
+        if (!$user) {
             $this->response('No. Handphone atau Password salah', self::HTTP_UNAUTHORIZED);
+        }
+
+        if (FALSE === hash_equals($user->password, md5($password))) {
+            $this->response('No. Handphone atau Password salah', self::HTTP_UNAUTHORIZED);
+        }
+
+        if ($user->verified=='0') {
+          $this->response('Akun Anda belum terverifikasi', self::HTTP_UNAUTHORIZED);
         }
 
         // TODO: consider issuer and audience as security concern
