@@ -234,7 +234,8 @@ class Reward extends MY_Controller{
             }
 
             $datas = array(
-              "receipt_image" => $imageURL
+              "receipt_image" => $imageURL,
+              "status"=>4,
             );
             $this->db->update('Promo_User', $datas, array('id' => $promoUser->id));
             $this->response($promoUser->id, self::HTTP_OK);
