@@ -10,6 +10,11 @@ class Reward extends MY_Controller{
         parent::__construct();
     }
 
+    public function index_get()
+    {
+
+    }
+
     public function index_post()
     {
         $resp = array(
@@ -45,7 +50,7 @@ class Reward extends MY_Controller{
             $resp['product']=$product;
 
             // check promo stil valid
-            $sql = "SELECT `id`, `name`, `description`, `promo_type`, `promo_value`, `period_start`, `period_end` FROM `Promo` WHERE `id` = ? AND NOW() BETWEEN `period_start` AND `period_end` AND `status` = 1 LIMIT 1";
+            $sql = "SELECT `id`, `name`, `description`, `promo_type`, `promo_value`, `period_start`, `period_end`, `referral_commission` FROM `Promo` WHERE `id` = ? AND NOW() BETWEEN `period_start` AND `period_end` AND `status` = 1 LIMIT 1";
             $promo = $this->db->query($sql, array($referrer->promo_id))->row();
             if (!$promo) {
                 $resp['message'] = "Promo tidak ditemukan";
