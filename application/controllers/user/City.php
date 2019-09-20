@@ -17,7 +17,7 @@ class City extends MY_Controller{
         if ($province_id)
         {
             $where = array_merge($where, array(
-                'province_id'  => $province_id,
+                'province_id'  => intval($province_id),
             ));
         }
 
