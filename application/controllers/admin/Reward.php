@@ -33,11 +33,11 @@ class Reward extends MY_Controller {
 
         if ($logs) {
             array_multisort(array_map(function($logs) {
-                return $element['created_at'];
+                return $logs['created_at'];
             }, $logs), SORT_DESC, $logs);
         }
 
-        $this->response($products, self::HTTP_OK);
+        $this->response($logs, self::HTTP_OK);
     }
 
     public function index_get()
@@ -47,7 +47,7 @@ class Reward extends MY_Controller {
         U.`id` AS `user_id`, U.`name` AS `user_name`, U.`phone` AS `user_phone`,
         B.`id` AS `product_id`, B.`name` AS `product_name`,
         B.`description` AS `product_description`, B.`estimated_price`, B.`image`,
-        P.`id` AS `promo_id`, P.`name` AS `promo_name`, P.`promo_type`, P.`promo_value`, P.`referral_commission`, P.`referral_share_count`, P.`description` AS `promo_description`
+        P.`id` AS `promo_id`, P.`name` AS `promo_name`, P.`promo_type`, P.`promo_value`, P.`referral_commission`, P.`referral_share_count`, P.`description` AS `promo_description`, A.`updated_at`, B.`sku`
             FROM `Promo_User` A, `Promo` P, `Product` B, `User` U
         WHERE
           A.`product_id` = B.`id` AND A.`promo_id` = P.`id` AND A.`user_id` = U.`id` AND
@@ -111,7 +111,8 @@ class Reward extends MY_Controller {
               "receipt_time"=>$receipt_time,
               "receipt_place" => $receipt_place,
               "note"=>$note,
-              "status"=>$status,
+              "status_from" => $promoUser->id,
+              "status_to"=>$status,
               "created_by"=>$this->subject_id,
             );
             $this->db->insert('Promo_User_Log', $logs);
