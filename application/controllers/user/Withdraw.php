@@ -55,7 +55,7 @@ class Withdraw extends MY_Controller{
         PU.`status` = 1";
       $totalIN = $this->db->query($sql, array($this->user_reward))->row();
 
-      return $totalIN->amout;
+      return $totalIN->amount;
     }
 
     private function OUT()
@@ -64,11 +64,11 @@ class Withdraw extends MY_Controller{
         return 0;
       }
 
-      $sql = "SELECT IFNULL(SUM(CU.`admin_app_nominal`),0) AS `amount` FROM `User_Commission` UC WHERE
+      $sql = "SELECT IFNULL(SUM(UC.`admin_app_nominal`),0) AS `amount` FROM `User_Commission` UC WHERE
         UC.`user_id` = ? AND UC.`status` = 1";
       $totalOUT = $this->db->query($sql, array($this->user_reward))->row();
 
-      return $totalIN->amout;
+      return $totalOUT->amount;
     }
 
     private function balance()
