@@ -111,7 +111,7 @@ class Reward extends MY_Controller {
               "receipt_time"=>$receipt_time,
               "receipt_place" => $receipt_place,
               "note"=>$note,
-              "status_from" => $promoUser->id,
+              "status_from" => $promoUser->status,
               "status_to"=>$status,
               "created_by"=>$this->subject_id,
             );
