@@ -63,7 +63,7 @@ class Auth extends MY_Controller {
           $this->response('No. Handphone atau Password salah', self::HTTP_BAD_REQUEST);
         }
 
-        $sql = "SELECT `id`, `name`, `phone`, `password`,`verified` FROM `User` WHERE `phone` = ? LIMIT 1";
+        $sql = "SELECT `id`, `name`, `phone`, `password`, `verified`, `is_profile_completed` FROM `User` WHERE `phone` = ? LIMIT 1";
         $user = $this->db->query($sql, array($phone))->row();
 
         if (!$user) {
@@ -75,7 +75,10 @@ class Auth extends MY_Controller {
         }
 
         if ($user->verified=='0') {
-          $this->response('Akun Anda belum terverifikasi', self::HTTP_UNAUTHORIZED);
+          $this->response(array(
+              'id'    => $user->id,
+              'message' => 'Akun Anda belum terverifikasi'
+            ), self::HTTP_UNAUTHORIZED);
         }
 
         // TODO: consider issuer and audience as security concern
@@ -90,6 +93,7 @@ class Auth extends MY_Controller {
             'token' => $token,
             'name'  => $user->name,
             'phone'  => $user->phone,
+            'is_profile_completed'  => $user->is_profile_completed,
         );
 
         $this->response($response, self::HTTP_OK);
