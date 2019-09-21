@@ -15,14 +15,14 @@ class Withdraw extends MY_Controller{
     public function index_get()
     {
         $sql = "SELECT * FROM (
-          SELECT PU.`code` AS `id`, PU.`status_update` AS `date`, P.`name` AS `description`, IFNULL(P.`sku`,'') AS `sku`, P.`estimated_price`, 'IN' AS `type`, U.`name` AS `username`, PU.`commission_value` AS `amount`
+          SELECT PU.`code` AS `id`, PU.`status_update` AS `date`, CONCAT('Komisi Penjualan: ', PU.`code`) AS `description`, IFNULL(P.`sku`,'') AS `sku`, P.`estimated_price`, 'cr' AS `type`, U.`name` AS `username`, PU.`commission_value` AS `amount`
           FROM `Promo_User` PU, `Product` P, `User` U
           WHERE
           PU.`product_id` = P.`id` AND PU.`user_id` = U.`id` AND
           PU.`user_id` != PU.`referrer_id` AND PU.`referrer_id` IN (?) AND
           PU.`status` = 1
           UNION ALL
-          SELECT UC.`id`, UC.`admin_app_date` AS `date`, 'WITHDRAW' AS `description`, '' AS `sku`, '' AS `estimated_price`, 'OUT' AS `type`, '' AS `name`, UC.`admin_app_nominal` AS `amount`
+          SELECT UC.`id`, UC.`admin_app_date` AS `date`, 'Tarik Dana' AS `description`, '' AS `sku`, '' AS `estimated_price`, 'db' AS `type`, '' AS `name`, UC.`admin_app_nominal` AS `amount`
           FROM `User_Commission` UC WHERE
           UC.`user_id` = ? AND UC.`status` = 1
           ) AS `H` ORDER BY H.`date` DESC";
