@@ -14,6 +14,7 @@ class Model_Product extends CI_Model {
         $this->db->from($this->table);
         $this->db->join($this->table_client, $this->table_client . '.id = ' . $this->table . '.client_id', 'left');
         $this->db->join($this->table_category, $this->table_category . '.id = ' . $this->table . '.category_id', 'left');
+        $this->db->where($this->table . '.status =', 1);
 
         if ($limit > 0) {
             $this->db->limit($limit, $page * $limit - $limit);

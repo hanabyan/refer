@@ -21,7 +21,7 @@ class Product extends MY_Controller {
         if ($id) {
             $excludeProduct = array_map("intval", explode(",",$id));
             $excludeProduct = array_unique($excludeProduct);
-            $sql = "SELECT B.*, C.`name` AS `category_name`, D.`company_name` AS `client_name` FROM `Product` B, `Categories` C, `Client` D WHERE B.`category_id` = C.`id` AND B.`client_id` = D.`id` AND B.`id` NOT IN ? ORDER BY B.`name`";
+            $sql = "SELECT B.*, C.`name` AS `category_name`, D.`company_name` AS `client_name` FROM `Product` B, `Categories` C, `Client` D WHERE B.`category_id` = C.`id` AND B.`client_id` = D.`id` AND B.`id` NOT IN ? AND B.`status` = 1 ORDER BY B.`name`";
             $data = $this->db->query($sql,array($excludeProduct))->result_array();
         } else {
             $data = $this->Model_product->data();
@@ -175,5 +175,29 @@ class Product extends MY_Controller {
         }
 
         return true;
+    }
+
+    public function index_delete($id = null)
+    {
+        if (!$id)
+        {
+            return $this->set_response('Produk tidak ditemukan', self::HTTP_BAD_REQUEST);
+        }
+
+        $sql = "SELECT `id` FROM `Product` WHERE `id` = ?";
+        $product = $this->db->query($sql, array(intval($id)))->row();
+
+        if (!$product)
+        {
+            return $this->set_response('Produk tidak ditemukan', self::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $this->db->update('Product', array('status'  => 9), array('id'  => $product->id));
+            return $this->set_response($product->id, self::HTTP_OK);
+        } catch (Exception $e)
+        {
+            return $this->set_response('Gagal menghapus produk', self::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

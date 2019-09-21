@@ -33,7 +33,8 @@ class Promo extends MY_Controller {
         if ($id<1) {
             $this->response("Invalid Promo", self::HTTP_BAD_REQUEST);
         }
-        $sql = "SELECT B.*, A.`total_item`, C.`name` AS `category_name`, D.`company_name` AS `client_name` FROM `Promo_Product` A, `Product` B, `Categories` C, `Client` D WHERE A.`product_id` = B.`id` AND B.`category_id` = C.`id` AND B.`client_id` = D.`id` AND A.`promo_id` = ? ORDER BY B.`name`";
+        $sql = "SELECT B.*, A.`total_item`, C.`name` AS `category_name`, D.`company_name` AS `client_name` FROM `Promo_Product` A, `Product` B, `Categories` C, `Client` D WHERE A.`product_id` = B.`id` AND B.`category_id` = C.`id` AND B.`client_id` = D.`id` AND A.`promo_id` = ? 
+        AND B.`status` = 1 ORDER BY B.`name`";
         $data = $this->db->query($sql,array($id))->result_array();
 
         $this->response($data, self::HTTP_OK);
