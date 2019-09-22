@@ -164,4 +164,77 @@ class Promo extends MY_Controller {
             $this->response('Error while processing data', self::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    public function featured_get($type = null)
+    {
+        if ($type && $type === 'new') {
+            $id = $this->input->get('id');
+            $id = trim($id);
+
+            $excludePromo = array_map("intval", explode(",",$id));
+            $excludePromo = array_unique($excludePromo);
+
+            $sql = "SELECT PP.*, A.`name` AS `product_name`, A.`description` AS `product_description`, A.`image`, B.`name` AS `promo_name`, B.`description` AS `promo_description` FROM `Promo_Product` PP, `Product` A, `Promo` B WHERE PP.`product_id` = A.`id` AND PP.`promo_id` = B.`id` AND A.`status` = 1 AND B.`status` = 1 AND `is_featured` IS NULL AND PP.`id` NOT IN ?";
+
+            $featured = $this->db->query($sql, array($excludePromo))->result_array();
+        } else {
+            $sql = "SELECT PP.*, A.`name` AS `product_name`, A.`description` AS `product_description`, A.`image`, B.`name` AS `promo_name`, B.`description` AS `promo_description` FROM `Promo_Product` PP, `Product` A, `Promo` B WHERE PP.`product_id` = A.`id` AND PP.`promo_id` = B.`id` AND A.`status` = 1 AND B.`status` = 1 AND `is_featured` = 1";
+
+            $featured = $this->db->query($sql)->result_array();
+        }
+
+        return $this->set_response($featured, self::HTTP_OK);
+    }
+
+    public function featured_put()
+    {
+        $cols = array(
+            'promo'
+        );
+
+        foreach ($cols as $col) {
+            $$col = $this->put($col);
+        }
+
+        if (!is_array($promo)) {
+            return $this->set_response('Invalid Product Promo', self::HTTP_BAD_REQUEST);
+        }
+
+        if (count($promo) > 4)
+        {
+            return $this->set_response('Maksimal hanya 4 featured', self::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $this->db->trans_begin();
+            $ids = $batch = array();
+            foreach ($promo as $p) {
+                $batch[] = array(
+                    'id' => intval($p['id']),
+                    'is_featured' => 1,
+                    'featured_order' => intval($p['featured_order']),
+                );
+            }
+
+            $this->db->set('is_featured', null);
+            $this->db->set('featured_order', null);
+            $this->db->update('Promo_Product');
+
+            if ($batch)
+            {
+                $this->db->update_batch('Promo_Product', $batch, 'id');
+            }
+
+            if ($this->db->trans_status() === FALSE) {
+                $this->db->trans_rollback();
+                return $this->set_response('Database error', self::HTTP_INTERNAL_SERVER_ERROR);
+            } else {
+                $this->db->trans_commit();
+                return $this->set_response('Update berhasil', self::HTTP_OK);
+            }
+
+        } catch(Exception $e) {
+            return $this->set_response('Error while processing data', self::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }
